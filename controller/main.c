@@ -1,25 +1,31 @@
+#include "logic.h"
+#include "move.h"
+#include "pico/time.h"
 #include "read.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <pico/stdlib.h>
 #include <hardware/gpio.h>
 
-static bitboard last_state = 0;
-
 int main() {
     stdio_init_all();
 
     read_setup();
+    logic_setup();
 
-    while (true) {
-        bitboard state = read_board();
-        if(state != last_state) {
-            last_state = state;
-            printf("current state = %llu\n", state);
-        }
-        sleep_ms(25);
+    gpio_init(17);
+    gpio_set_dir(17, GPIO_OUT);
+    gpio_put(17, 1);
+    
+    while(true) {
+        move played = wait_for_move();
+        printf("played: %i %i\n", get_origin(played), get_destination(played));
+        printf("state: %llu\n", last_state);
+
+        // Wait for the validation pin to be low
+        while(gpio_get(MOVE_VALIDATION_PIN)) { sleep_ms(25); }
     }
-
+    
     return 0;
 }
 
