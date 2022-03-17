@@ -13,10 +13,6 @@ int main() {
     read_setup();
     logic_setup();
 
-    gpio_init(17);
-    gpio_set_dir(17, GPIO_OUT);
-    gpio_put(17, 1);
-    
     while(true) {
         move played = wait_for_move();
         printf("played: %i %i\n", get_origin(played), get_destination(played));
