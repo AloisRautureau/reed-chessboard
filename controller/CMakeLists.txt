@@ -1,5 +1,7 @@
 add_executable(reed_chessboard_controller
     main.c
+    read.h
+    bitboard.h
     )
 
 target_link_libraries(reed_chessboard_controller pico_stdlib)
