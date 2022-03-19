@@ -1,5 +1,5 @@
 # reed-chessboard-controller
-A simple controller and UCI compatible driver to create Reed switch-based smart chessboards using a Raspberry Pi Pico.
+A simple controller and UCI compatible driver to create Reed switch-based chessboards using an RP2040.
 
 # Table of Contents
 - [Table of Contents](#table-of-contents)
@@ -12,32 +12,38 @@ A simple controller and UCI compatible driver to create Reed switch-based smart 
 # Description
 [Back to top](#table-of-contents)
 
-This was created mainly as a subproject of BEAUB, a robot playing OTB chess. I figured people might want to create smart reed switch-based smart chessboards themselves, since they're cheap and not too difficult, which is why this repo exists!
+This was created mainly as a subproject of BEAUB, a robot playing OTB chess. I figured people might want to create reed switch-based chessboards themselves, since they're cheap and not too difficult, which is why this repo exists!
 
 You can think of the project as two parts:
 - The controller code, meant to run on the RP2040 micro-controller.
-- The driver, making this act as a normal USB Serial Device that can be used by other programs.
+- A driver, making it able to act similarily to a [DGT chessboard](https://digitalgametechnology.com/).
 
 # Installation
 [Back to top](#table-of-contents)
 
 ## Compiling
-** You can skip this step by downloading the [realease package]() **
-To compile from source, follow those commands:
-```bash
-git clone https://github.com/AloisRautureau/reed-chessboard-controller.git
-cd reed-chessboard-controller
-cmake -S . -B build
-```
-You'll then find the controller binary in `build/controller`.
+**You can skip this step by downloading the [realease package]()**
+
+To compile from source, you'll need CMake as well as Cargo. 
+Then, follow those commands:
+
+- `git clone https://github.com/AloisRautureau/reed-chessboard-controller.git`
+- `cd reed-chessboard-controller`
+- `cmake -S controller -B build`
+- `cmake --build build`
+- `cargo build --release`
+
+You'll then find the controller binary in `build/controller/` and the driver binary in `build/release/`.
 
 ## Flashing the controller code
-You'll first need to flash the controller code (reed_chessboard_controller.uf2) onto your RP2040 based board. The specifics depend on the manufacturer, so please refer to the documentation of your specific controller for this step.
+You'll first need to flash the controller code (`reed_chessboard_controller.uf2`) onto your RP2040-base micro-controller. How this is done may vary for each specific controller, so you'll need to refer to its documentation here.
 
 The pinout is as follows:
-- Ranks (from A to H) are GPIO pins from 8 to 15
-- Columns (from 1 to 8) are GPIO pins from 0 to 7
+- Outputing pins are GPIO0 to GPIO7
+- Reading pins are GPIO8 to GPIO15
 - The move validation button should be linked to GPIO 16
+
+The outputing and reading pins should be connected to columns/ranks 1/A to 8/H.
 
 (I'll try to add a clear schematic for this, I swear)
 

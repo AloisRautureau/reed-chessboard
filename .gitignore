@@ -54,5 +54,10 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# Cache files
+# Cache files and other junky stuff
 .cache/
+.vscode/
+
+# Added by cargo
+
+/target
