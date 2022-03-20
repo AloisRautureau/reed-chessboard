@@ -1,4 +1,5 @@
-# reed-chessboard-controller
+# reed-chessboard
+<p align="center"><img src="logo.svg" width="256px" height="256px" align="middle"></p>
 A simple controller and UCI compatible driver to create Reed switch-based chessboards using an RP2040.
 
 # Table of Contents
@@ -67,4 +68,4 @@ Sure... *I guess?*
 
 The project is most likely in a finished state as of the time this repo went public, and isn't particularily scalable.
 
-Contributions are therefore welcome when it comes to bug fixes, etc, but there won't be any real fixed way of contributing. Just send an email and we'll figure something out!
+Contributions are obviously welcome when it comes to bug fixes, QOL, etc, but there won't be any real fixed way of contributing. Just contact me via email, Telegram or anything and we'll figure something out!
