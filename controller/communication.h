@@ -1,12 +1,25 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
 
+#include "logic.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <pico/stdlib.h>
 
 const uint16_t MAX_BUFFER_LENGTH = 32;
+
+enum ControllerMessage {
+    ACK = 0x01,
+    MOVE = 0x10,
+};
+
+enum DriverMessage {
+    SYN = 0x01,
+    PARSED_MOVE = 0x11,
+    ILLEGAL_MOVE = 0x12,
+    RESET = 0xFF,
+};
 
 uint16_t read_line(char* buffer) {
     uint16_t size = 0;
@@ -20,17 +33,31 @@ uint16_t read_line(char* buffer) {
     }
     return size;
 }
+
+
 /**
- * Reads the last commands sent and deals with them
+ * Reads the first command found in standard input and deals with it
  * accordingly
  */
 void handle_serial() {
-    char* command;
-    int command_length = read_line(command);
+    uint8_t command_byte = getchar_timeout_us(100);
 
-    if(strcmp(command, "rcdprobe")) {
-        printf("rccok");
+    switch (command_byte) {
+        case SYN: putchar(ACK); break;
+        case PARSED_MOVE: break;
+        case ILLEGAL_MOVE: break;
+        case RESET: reset_state(); break;
+        default: break;
     }
+}
+
+/**
+ * @param move_bytes the bytes to send
+ */
+void send_move_bytes(uint16_t move_bytes) {
+    putchar(MOVE);
+    putchar(get_origin(move_bytes));
+    putchar(get_destination(move_bytes));
 }
 
 #endif

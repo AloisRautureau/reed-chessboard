@@ -7,6 +7,9 @@ edition = "2021"
 
 [dependencies]
 serialport = "4.0.1"
+num-traits = "0.2"
+num-derive = "0.2"
+
 
 [[bin]]
 name = "rcd"
