@@ -5,10 +5,12 @@
 
 typedef uint8_t move;
 
+const move INVALID_MOVE = 0xFFFF;
+
 /**
  * @return an encoded move as origin-destination square
  */
-move encode(uint8_t from, uint8_t to) {
+move encode(uint16_t from, uint16_t to) {
     return (from << 8) | to;
 }
 /**

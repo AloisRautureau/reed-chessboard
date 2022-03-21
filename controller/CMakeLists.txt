@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 include(pico_sdk_import.cmake)
 
-project(reed-chessboard-controller
+project(rcc
     VERSION 0.1.0
     DESCRIPTION "Code to make a smart chessboard out of a reed switch matrix and an RP2040 based controller"
     LANGUAGES C CXX ASM
@@ -15,16 +15,18 @@ endif()
 
 pico_sdk_init()
 
-add_executable(reed_chessboard_controller
+add_executable(rcc
     main.c
     read.h
     bitboard.h
     move.h
     logic.h
+    communication.h
     )
 
-target_link_libraries(reed_chessboard_controller pico_stdlib)
+target_link_libraries(rcc pico_stdlib)
 
-pico_add_extra_outputs(reed_chessboard_controller)
+pico_add_extra_outputs(rcc)
 
-pico_enable_stdio_usb(reed_chessboard_controller 1)
+pico_enable_stdio_usb(rcc 1)
+pico_enable_stdio_uart(rcc 0)

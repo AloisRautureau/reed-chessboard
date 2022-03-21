@@ -123,12 +123,15 @@ move get_move() {
 }
 
 
-move wait_for_move() {
-    while(!gpio_get(MOVE_VALIDATION_PIN)) {
+move check_for_move() {
+    move m = INVALID_MOVE;
+    if(gpio_get(MOVE_VALIDATION_PIN)) {
+        m = get_move();
+        reset_state();
+    }
+    else {
         record_state(read_board());
     }
-    move m = get_move();
-    reset_state();
     return m;
 }
 
