@@ -1,10 +1,10 @@
-const DESTINATION_MASK: u16 = 0xFF;
-const ORIGIN_MASK: u16 = 0xFF00;
+const DESTINATION_MASK: u16 = 0xFF00;
+const ORIGIN_MASK: u16 = 0x00FF;
 
 /// Parses a move byte to a string notation (origin-destination)
 /// using UCI-like notation
 pub fn parse(move_byte: u16) -> Result<String, String> {
-    let (origin, destination) = ((move_byte & ORIGIN_MASK) >> 8, move_byte & DESTINATION_MASK);
+    let (origin, destination) = (move_byte & ORIGIN_MASK, (move_byte & DESTINATION_MASK) >> 8);
 
     if !(0..64).contains(&origin) || !(0..=64).contains(&destination) { Err(String::from("Invalid move")) }
     else { Ok(square_string_from_index(origin as u8) + &square_string_from_index(destination as u8)) }

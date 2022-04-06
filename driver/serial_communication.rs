@@ -1,4 +1,5 @@
 use std::time::Duration;
+use std::thread;
 
 use serialport::{Error, ErrorKind, SerialPort};
 use crate::move_parser;
@@ -6,15 +7,16 @@ use crate::move_parser;
 #[repr(u8)]
 pub enum DriverMessage {
     Syn = 0x01,
-    ParsedMove = 0x11,
-    IllegalMove = 0x12,
-    Reset = 0xFF,
+    ParsedMove = 0x10,
+    IllegalMove = 0x11,
+    Reset = 0xF0,
 }
 
 #[repr(u8)]
 pub enum ControllerMessage {
     Ack = 0x01,
     Move = 0x10,
+    State = 0x20,
 }
 
 /// Tries connecting to a controller.
@@ -39,7 +41,9 @@ pub fn connect() -> Result<Box<dyn SerialPort>, Error> {
 pub fn handle_messages(port: &mut Box<dyn SerialPort>) -> Result<(), serialport::Error> {
     if let Some(message) = read_byte(port) {
         if ControllerMessage::Move as u8 == message {
-            let move_string = match move_parser::parse(read_move_bytes(port).unwrap_or(0xFFFF)) {
+            thread::sleep(Duration::from_millis(5));
+            let move_bytes = read_move_bytes(port).unwrap_or(0xFFFF);
+            let move_string = match move_parser::parse(move_bytes) {
                 Ok(mv) => {
                     port.write(&[DriverMessage::ParsedMove as u8])?;
                     mv
@@ -78,6 +82,22 @@ fn read_move_bytes(port: &mut Box<dyn SerialPort>) -> Option<u16> {
             .iter()
             .enumerate()
             .fold(0, |acc, (i, b)| { acc + ((*b as u16) << (i*8)) })
+        )
+    } else {
+        None
+    }
+}
+
+/// Reads the next 8 bytes (corresponding to a bitboard) in the serial port's
+/// standard output
+/// # Arguments
+/// * `port` - The port to read from
+fn read_state_bytes(port: &mut Box<dyn SerialPort>) -> Option<u64> {
+    if let Some(bytes) = read_bytes(port, 8) {
+        Some(bytes
+            .iter()
+            .enumerate()
+            .fold(0, |acc, (i, b)| { acc + ((*b as u64) << (i*8))} )
         )
     } else {
         None

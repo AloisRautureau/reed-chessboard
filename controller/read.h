@@ -6,8 +6,8 @@
 #include <hardware/gpio.h>
 #include <stdint.h>
 
-// Both boan be used as input or output depending on your design
-// choices, it shouldn't matter too much
+#include <stdio.h>
+
 const uint8_t ROW_PINS[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 const uint8_t COLUMN_PINS[8] = {8, 9, 10, 11, 12, 13, 14, 15};
 
@@ -28,8 +28,8 @@ void read_setup() {
 /**
  * @return a bitboard representation of the board (1 for occupancy, 0 for empty)
  */
-bitboard read_board() {
-    bitboard state = EMPTY;
+uint64_t read_board() {
+    uint64_t state = EMPTY;
 
     for(uint8_t i = 0; i < 8; ++i) {
         gpio_put(ROW_PINS[i], 1);
@@ -37,6 +37,7 @@ bitboard read_board() {
             if(gpio_get(COLUMN_PINS[j])) { state |= square_bitmask(i, j); }
         }
         gpio_put(ROW_PINS[i], 0);
+        sleep_ms(5);
     }
 
     return state;

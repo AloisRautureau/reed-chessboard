@@ -18,7 +18,7 @@ enum DriverMessage {
     SYN = 0x01,
     PARSED_MOVE = 0x11,
     ILLEGAL_MOVE = 0x12,
-    RESET = 0xFF,
+    RESET = 0xF0,
 };
 
 uint16_t read_line(char* buffer) {

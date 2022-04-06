@@ -3,23 +3,20 @@
 
 #include <stdint.h>
 
-typedef uint64_t bitboard;
-
-const bitboard EMPTY = 0b0;
-const bitboard SINGLE = 0b1;
-const bitboard UNIVERSE = UINT64_MAX;
+const uint64_t EMPTY = 0b0;
+const uint64_t SINGLE = 0b1;
+const uint64_t UNIVERSE = UINT64_MAX;
 
 /**
  * @return the bitmask for a square given its row and column
- */
-bitboard square_bitmask(int row, int column) {
+ */ uint64_t square_bitmask(int row, int column) {
     return SINGLE << (8*row + column);
 }
 
 /**
- * @return the Hamming Distance between two bitboards
+ * @return the Hamming Distance between two uint64_ts
  */
-uint8_t hamming_distance(bitboard b1, bitboard b2) {
+uint8_t hamming_distance(uint64_t b1, uint64_t b2) {
     return __builtin_popcount(b1 ^ b2);
 }
 
@@ -42,11 +39,11 @@ const uint64_t debruijn64 = 0x03f79d71b4cb0a89;
  *         Harald Prokop
  *         Keith H. Randall
  * "Using de Bruijn Sequences to Index a 1 in a Computer Word"
- * @param b bitboard to scan
+ * @param b uint64_t to scan
  * @precondition b != 0
  * @return index (0..63) of least significant one bit
  */
-uint8_t bitscan_forward(bitboard b) {
+uint8_t bitscan_forward(uint64_t b) {
     return deBruijnIndex64[((b & -b) * debruijn64) >> 58];
 }
 

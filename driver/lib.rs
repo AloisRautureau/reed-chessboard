@@ -21,11 +21,13 @@ pub fn run() -> () {
     // - Don't have a controller, then we wait for one
     loop {
         controller_port = match controller_port {
-            Some(mut port) => if let Err(_) = handle_messages(&mut port) { 
-                println!("lost connection");
-                None 
-            } else { 
-                Some(port) 
+            Some(mut port) => {
+                if let Err(_) = handle_messages(&mut port) { 
+                    println!("lost connection");
+                    None 
+                } else { 
+                    Some(port) 
+                }
             }
             None => Some(wait_for_controller()),
         }

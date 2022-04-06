@@ -8,22 +8,23 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 const uint MOVE_VALIDATION_PIN = 16;
-bool move_validated = false;
+static bool move_validated = false;
 
-bitboard last_state = EMPTY;
-bitboard intermediate_states[2048] = {};
-uint16_t intermediate_states_count = 0;
+static uint64_t last_state = EMPTY;
+static uint64_t intermediate_states[2048] = {};
+static uint16_t intermediate_states_count = 0;
 
-bitboard diagonal_step_mask[64] = {};
-bitboard castling_mask = 0x5400000000000054;
+static uint64_t diagonal_step_mask[64] = {};
+static uint64_t castling_mask = 0x5400000000000054;
 
 /**
  * Records a new intermediate state if it's different from the previous one
  * and there is room for it
  */
-void record_state(bitboard state) {
+void record_state(uint64_t state) {
     if(intermediate_states_count < 2048 && intermediate_states[intermediate_states_count - 1] != state) {
         intermediate_states[intermediate_states_count] = state;
         ++intermediate_states_count;
@@ -42,13 +43,15 @@ void reset_state() {
  * Produces a heatmap of changes in intermediate states for each square
  */
 uint32_t* intermediate_states_heatmap() {
-    uint32_t* heatmap = (uint32_t*) malloc( 64 * sizeof(uint32_t) );
+    size_t heatmap_size = 64 * sizeof(uint32_t);
+    uint32_t* heatmap = (uint32_t*) malloc(heatmap_size);
+    memset(heatmap, 0, heatmap_size);
     for(int i = 1; i < intermediate_states_count; ++i) {
         // We assume that only one square changes between each state.
         // This might not be absolutely true tbh, but as long as no bugs
         // rise up because of this, let's not hit performance trying to
         // do a serialization.
-        bitboard delta = intermediate_states[i] ^ intermediate_states[i - 1];
+        uint64_t delta = intermediate_states[i] ^ intermediate_states[i - 1];
         heatmap[bitscan_forward(delta)] += 1;
     }
     return heatmap;
@@ -77,13 +80,13 @@ uint8_t most_changed_square(uint8_t excluded) {
  * fetched between the last and current state.
  */
 move get_move() {
-    bitboard current_state = read_board();
-    bitboard changed_squares = current_state ^ last_state;
+    uint64_t current_state = read_board();
+    uint64_t changed_squares = current_state ^ last_state;
     uint8_t distance = hamming_distance(current_state, last_state);
 
     // We can (mostly) deduce what move was played using Hamming Distance
     // between current and last state.
-    move m = 0;
+    move m = INVALID_MOVE;
     switch (distance) {
         case 1: { // Capture
             // This is a special case: the origin square is the only one which state's changes.
@@ -145,8 +148,8 @@ move check_for_move() {
  * TODO: This is disgusting, might want to clean it up later
  */
 void diagonal_step_mask_calculation() {
-    bitboard outer_mask = 0xff818181818181ff;
-    bitboard valid_mask = 0x7effc3c3c3c3ff7e;
+    uint64_t outer_mask = 0xff818181818181ff;
+    uint64_t valid_mask = 0x7effc3c3c3c3ff7e;
     int8_t deltas[4] = {7, 9, -7, -9};
 
     for(uint8_t from_index = 0; from_index < 64; ++from_index) {
@@ -173,6 +176,7 @@ void diagonal_step_mask_calculation() {
 void logic_setup() {
     gpio_init(MOVE_VALIDATION_PIN);
     gpio_set_dir(MOVE_VALIDATION_PIN, GPIO_IN);
+    reset_state();
     diagonal_step_mask_calculation();
 }
 

@@ -25,11 +25,11 @@ You can think of the project as two parts:
 ## Compiling
 **You can skip this step by downloading the [realease package]()**
 
-To compile from source, you'll need CMake as well as Cargo. 
+To compile from source, you'll need CMake, the Pico C/C++ SDK as well as Cargo. 
 Then, follow those commands:
 
 - `git clone https://github.com/AloisRautureau/reed-chessboard-controller.git`
-- `cd reed-chessboard-controller`
+- `cd reed-chessboard`
 - `cmake -S controller -B build`
 - `cmake --build build`
 - `cargo build --release`
