@@ -1,18 +1,45 @@
 use serial_communication::handle_messages;
 use serialport::SerialPort;
+use std::thread;
+use std::sync::mpsc;
 
 pub mod serial_communication;
 pub mod move_parser;
 
-const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub struct Chessboard {
+    move_stack: mpsc::Receiver<String>
+}
+impl Chessboard {
+    pub fn new() -> Self {
+        let (transmitter, move_stack) = mpsc::channel();
 
-/// Initializes the driver and tries to find a compatible device
-pub fn init() -> () {
-    println!("rcd v{} by Aloïs 'baub' RAUTUREAU, 2022", VERSION);
+        thread::spawn(move || {
+            run(transmitter)
+        });
+
+        Chessboard {
+            move_stack
+        }
+    }
+
+    /// Blocks the thread it is called from until the driver
+    /// receives a move
+    pub fn wait_for_move(&mut self) -> String {
+        self.move_stack.recv().unwrap()
+    }
+
+    /// Tries to get a move if one is available, non-blocking
+    pub fn get_move(&mut self) -> Option<String> {
+        if let Ok(mv) = self.move_stack.try_recv() {
+            Some(mv)
+        } else {
+            None
+        }
+    }
 }
 
 /// The main loop function
-pub fn run() -> () {
+fn run(move_stack: mpsc::Sender<String>) {
     let mut controller_port: Option<Box<dyn SerialPort>> = None;
 
     // While looping, we either :
@@ -22,7 +49,7 @@ pub fn run() -> () {
     loop {
         controller_port = match controller_port {
             Some(mut port) => {
-                if let Err(_) = handle_messages(&mut port) { 
+                if let Err(_) = handle_messages(&mut port, &move_stack) { 
                     println!("lost connection");
                     None 
                 } else { 

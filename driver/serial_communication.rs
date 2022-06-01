@@ -1,5 +1,6 @@
 use std::time::Duration;
 use std::thread;
+use std::sync::mpsc;
 
 use serialport::{Error, ErrorKind, SerialPort};
 use crate::move_parser;
@@ -38,7 +39,7 @@ pub fn connect() -> Result<Box<dyn SerialPort>, Error> {
 /// Handles the last message received from the given serial port
 /// # Arguments
 /// * `port` - The port to read from 
-pub fn handle_messages(port: &mut Box<dyn SerialPort>) -> Result<(), serialport::Error> {
+pub fn handle_messages(port: &mut Box<dyn SerialPort>, move_stack: &mpsc::Sender<String>) -> Result<(), serialport::Error> {
     if let Some(message) = read_byte(port) {
         if ControllerMessage::Move as u8 == message {
             thread::sleep(Duration::from_millis(5));
@@ -51,6 +52,7 @@ pub fn handle_messages(port: &mut Box<dyn SerialPort>) -> Result<(), serialport:
                 Err(_) => { port.write(&[DriverMessage::IllegalMove as u8])?; String::from("") }
             };
             println!("move {}", move_string);
+            move_stack.send(move_string).unwrap();
         } else if ControllerMessage::Ack as u8 == message {
             println!("received a new ack")
         } else {
