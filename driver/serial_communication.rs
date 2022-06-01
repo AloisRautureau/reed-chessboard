@@ -44,6 +44,7 @@ pub fn handle_messages(port: &mut Box<dyn SerialPort>, move_stack: &mpsc::Sender
         if ControllerMessage::Move as u8 == message {
             thread::sleep(Duration::from_millis(5));
             let move_bytes = read_move_bytes(port).unwrap_or(0xFFFF);
+            println!("received {}", move_bytes);
             let move_string = match move_parser::parse(move_bytes) {
                 Ok(mv) => {
                     port.write(&[DriverMessage::ParsedMove as u8])?;
@@ -51,7 +52,6 @@ pub fn handle_messages(port: &mut Box<dyn SerialPort>, move_stack: &mpsc::Sender
                 }
                 Err(_) => { port.write(&[DriverMessage::IllegalMove as u8])?; String::from("") }
             };
-            println!("move {}", move_string);
             move_stack.send(move_string).unwrap();
         } else if ControllerMessage::Ack as u8 == message {
             println!("received a new ack")
@@ -123,7 +123,8 @@ fn read_bytes(port: &mut Box<dyn SerialPort>, bytes_count: usize) -> Option<Vec<
 /// a compatible serial device
 fn probe(port_name: &str) -> Option<Box<dyn SerialPort>> {
     let mut port = match serialport::new(port_name, 115_200)
-            .timeout(Duration::from_millis(10))
+            .timeout(Duration::from_millis(100))
+            .baud_rate(9600)
             .open() {
                 Ok(p) => p,
                 Err(_) => return None

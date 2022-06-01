@@ -43,7 +43,7 @@ void handle_serial() {
     uint8_t command_byte = getchar_timeout_us(100);
 
     switch (command_byte) {
-        case SYN: putchar(ACK); break;
+        case SYN: putchar(ACK); reset_state(); break;
         case PARSED_MOVE: break;
         case ILLEGAL_MOVE: break;
         case RESET: reset_state(); break;

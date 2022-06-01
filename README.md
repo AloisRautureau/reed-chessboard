@@ -17,7 +17,7 @@ This was created mainly as a subproject of BEAUB, a robot playing OTB chess. I f
 
 You can think of the project as two parts:
 - The controller code, meant to run on the RP2040 micro-controller.
-- A driver, making it able to act similarily to a [DGT chessboard](https://digitalgametechnology.com/).
+- A driver, making it able to act similarily to a [DGT chessboard](https://digitalgametechnology.com/), altough more simplistic (for now).
 
 # Installation
 [Back to top](#table-of-contents)
@@ -30,8 +30,8 @@ Then, follow those commands:
 
 - `git clone https://github.com/AloisRautureau/reed-chessboard-controller.git`
 - `cd reed-chessboard`
-- `cmake -S controller -B build`
-- `cmake --build build`
+- `cmake -S controller -B build/controller`
+- `cmake --build build/controller`
 - `cargo build --release`
 
 You'll then find the controller binary in `build/controller/` and the driver binary in `build/release/`.
@@ -51,10 +51,25 @@ The outputing and reading pins should be connected to columns/ranks 1/A to 8/H.
 # Usage
 [Back to top](#table-of-contents)
 
-(This is a mock, but should look something like this)
-- Connect the controller via USB
-- Run the driver software
-- Play, and the moves you make should appear in the terminal! Cool stuff right there
+The driver being dead simple for now, using it is child's play as well.
+
+After connecting your newly flashed controller to any USB port, those are the only lines of code you'll need:
+
+```rust
+use rcd::Chessboard;
+
+let mut physical_board = Chessboard::new();
+
+// Blocks the thread while waiting for a move to be played on the board
+println!("Played {}", physical_board.wait_for_move());
+
+// Non blocking version of the function above, returning an Option<String> instead
+println!("Played {}", if let Some(mv) = physical_board.get_move() {
+    mv
+} else {
+    String::from("nothing")
+});
+```
 
 # License
 [Back to top](#table-of-contents)
